@@ -187,9 +187,15 @@ public class dataBoysCalculator {
         button.setBackground(new Color(204, 204, 204));
         button.setActionCommand(actionCommand); // Set the action command
         button.addActionListener((ActionEvent e) -> {
+<<<<<<< HEAD
             // Check which button was clicked based on the action command
             ImageIcon icon = new ImageIcon(imageName);
             display.setIcon(icon);
+=======
+            ButtonClick(e, display);
+            
+
+>>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
         });
 
         frame.add(button); // Add the button to the frame
@@ -232,17 +238,41 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "+/-":
             toggleSign(display);
             break;
+<<<<<<< HEAD
         
         case "Σ":
             handleIconCommand(command, display);
             break;
 
+=======
+
+        case "√": // Handle square root button
+            calculateSquareRoot(display);
+            break;
+
+        case "∛": // Handle cube root button
+            calculateCubeRoot(display);
+            break;
+        case "Σ":
+            handleIconCommand(command, display);
+            break;
+        case "log x": 
+            calculateLog(display);
+            break;
+        case "log₂ x":
+            calculateLogBase2(display);
+            break;
+        case "x^y": // Handle exponentiation button
+            
+            break;
+>>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
         default:
             handleDefaultCommand(command, display);
             break;
     }
 }
 
+<<<<<<< HEAD
 private void handleIconCommand(String command, ImageTextField display) {
     switch (command) {
         case "Σ":
@@ -252,6 +282,86 @@ private void handleIconCommand(String command, ImageTextField display) {
         
         case "√":
         
+=======
+private void calculateLogBase2(ImageTextField display) {
+    String input = display.getText().trim();
+    if (!input.isEmpty()) {
+        try {
+            double value = Double.parseDouble(input);
+            if (value <= 0) {
+                display.setText("Error: Input must be > 0");
+            } else {
+                double result = Math.log(value) / Math.log(2); 
+                display.setText(String.valueOf(result));
+            }
+        } catch (NumberFormatException ex) {
+            display.setText("Error: Invalid Input");
+        }
+    } else {
+        display.setText("Error: No Input");
+    }
+}
+
+private void calculateLog(ImageTextField display) {
+    String input = display.getText().trim();
+    if (!input.isEmpty()) {
+        try {
+            double value = Double.parseDouble(input);
+            if (value <= 0) {
+                display.setText("Error: Non-positive Input");
+            } else {
+                double result = Math.log(value);
+                display.setText(String.valueOf(result));
+            }
+        } catch (NumberFormatException ex) {
+            display.setText("Error: Invalid Input");
+        }
+    }
+}
+
+private void calculateSquareRoot(ImageTextField display) {
+    String input = display.getText().trim();
+    if (!input.isEmpty()) {
+        try {
+            double value = Double.parseDouble(input);
+            if (value < 0) {
+                display.setText("Error: Negative Input");
+            } else {
+                double result = Math.sqrt(value);
+                display.setText(String.valueOf(result));
+            }
+        } catch (NumberFormatException ex) {
+            display.setText("Error: Invalid Input");
+        }
+    }
+}
+
+
+private void calculateCubeRoot(ImageTextField display) {
+    String input = display.getText().trim();
+    if (!input.isEmpty()) {
+        try {
+            double value = Double.parseDouble(input);
+            double result = Math.cbrt(value);
+            display.setText(String.valueOf(result));
+        } catch (NumberFormatException ex) {
+            display.setText("Error: Invalid Input");
+        }
+    }
+}
+
+private void handleIconCommand(String command, ImageTextField display) {
+    switch (command) {
+        case "Σ": 
+        display.setText("n="); 
+        case "log x":
+                display.setText("Enter log(base,value): ");
+            break;
+            
+        
+        case "√":
+                
+>>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
             break;
         
         default:
@@ -313,6 +423,11 @@ private void calculateFactorial(ImageTextField display) {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
 private void toggleSign(ImageTextField display) {
     String currentTextSignToggle = display.getText().trim();
     if (!currentTextSignToggle.isEmpty()) {
@@ -431,10 +546,20 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
                 }
                 result = firstValue / secondValue;
                 break;
+<<<<<<< HEAD
             default:
                 display.setText("Error: Invalid Operation");
                 return;
         }
+=======
+            
+            default:
+                display.setText("Error: Invalid Operation");
+                return;
+             
+        }
+        
+>>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
 
         // Handle floor and ceiling based on last command
         if ("FLR".equals(lastCommand)) {
