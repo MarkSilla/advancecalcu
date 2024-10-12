@@ -187,15 +187,13 @@ public class dataBoysCalculator {
         button.setBackground(new Color(204, 204, 204));
         button.setActionCommand(actionCommand); // Set the action command
         button.addActionListener((ActionEvent e) -> {
-<<<<<<< HEAD
             // Check which button was clicked based on the action command
             ImageIcon icon = new ImageIcon(imageName);
             display.setIcon(icon);
-=======
             ButtonClick(e, display);
             
 
->>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
+
         });
 
         frame.add(button); // Add the button to the frame
@@ -238,19 +236,15 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "+/-":
             toggleSign(display);
             break;
-<<<<<<< HEAD
         
         case "Σ":
             handleIconCommand(command, display);
             break;
-
-=======
-
-        case "√": // Handle square root button
+        case "√": 
             calculateSquareRoot(display);
             break;
 
-        case "∛": // Handle cube root button
+        case "∛": 
             calculateCubeRoot(display);
             break;
         case "Σ":
@@ -265,14 +259,14 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "x^y": // Handle exponentiation button
             
             break;
->>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
+
         default:
             handleDefaultCommand(command, display);
             break;
     }
 }
 
-<<<<<<< HEAD
+
 private void handleIconCommand(String command, ImageTextField display) {
     switch (command) {
         case "Σ":
@@ -282,7 +276,7 @@ private void handleIconCommand(String command, ImageTextField display) {
         
         case "√":
         
-=======
+
 private void calculateLogBase2(ImageTextField display) {
     String input = display.getText().trim();
     if (!input.isEmpty()) {
@@ -361,7 +355,7 @@ private void handleIconCommand(String command, ImageTextField display) {
         
         case "√":
                 
->>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
+
             break;
         
         default:
@@ -423,11 +417,8 @@ private void calculateFactorial(ImageTextField display) {
     }
 }
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
 private void toggleSign(ImageTextField display) {
     String currentTextSignToggle = display.getText().trim();
     if (!currentTextSignToggle.isEmpty()) {
@@ -546,12 +537,12 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
                 }
                 result = firstValue / secondValue;
                 break;
-<<<<<<< HEAD
+
             default:
                 display.setText("Error: Invalid Operation");
                 return;
         }
-=======
+
             
             default:
                 display.setText("Error: Invalid Operation");
@@ -559,7 +550,7 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
              
         }
         
->>>>>>> 58f1f34 (Added SQRT, CBRT, LOGx, LOG2x)
+
 
         // Handle floor and ceiling based on last command
         if ("FLR".equals(lastCommand)) {
