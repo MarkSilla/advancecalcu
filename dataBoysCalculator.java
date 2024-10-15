@@ -526,7 +526,7 @@ private void appendToDisplay(ImageTextField display, String command) {
 
 // Method to check if a command is an operator
 private boolean isOperator(String command) {
-    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%");
+    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%") || command.equals("//");
 }
 
 private void performFloorOrCeil(ImageTextField display) {
@@ -693,9 +693,16 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
             case "%":
                 result = firstValue % secondValue;
                 break;
+            case "//":
+                if (secondValue == 0) {
+                    display.setText("Error: Div by 0");
+                    return;
+                }
+                result = (int) firstValue / (int) secondValue; 
+                break;
             default:
                 display.setText("Error: Invalid Operation");
-                return;
+                return; 
              
         }
         
