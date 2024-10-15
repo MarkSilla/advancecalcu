@@ -187,12 +187,8 @@ public class dataBoysCalculator {
         button.setBackground(new Color(204, 204, 204));
         button.setActionCommand(actionCommand); // Set the action command
         button.addActionListener((ActionEvent e) -> {
-            // Check which button was clicked based on the action command
-            ImageIcon icon = new ImageIcon(imageName);
-            display.setIcon(icon);
             ButtonClick(e, display);
             
-
 
         });
 
@@ -236,10 +232,7 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "+/-":
             toggleSign(display);
             break;
-        
-        case "Σ":
-            handleIconCommand(command, display);
-            break;
+
         case "√": 
             calculateSquareRoot(display);
             break;
@@ -256,26 +249,14 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "log₂ x":
             calculateLogBase2(display);
             break;
-        case "x^y": // Handle exponentiation button
+        case "x^y":
             
             break;
-
         default:
             handleDefaultCommand(command, display);
             break;
     }
 }
-
-
-private void handleIconCommand(String command, ImageTextField display) {
-    switch (command) {
-        case "Σ":
-        ImageIcon summationIcon = new ImageIcon("summationicon.png");
-        display.setIcon(summationIcon);  
-        display.setText("n="); 
-        
-        case "√":
-        
 
 private void calculateLogBase2(ImageTextField display) {
     String input = display.getText().trim();
@@ -355,7 +336,6 @@ private void handleIconCommand(String command, ImageTextField display) {
         
         case "√":
                 
-
             break;
         
         default:
@@ -537,12 +517,6 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
                 }
                 result = firstValue / secondValue;
                 break;
-
-            default:
-                display.setText("Error: Invalid Operation");
-                return;
-        }
-
             
             default:
                 display.setText("Error: Invalid Operation");
@@ -550,7 +524,6 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
              
         }
         
-
 
         // Handle floor and ceiling based on last command
         if ("FLR".equals(lastCommand)) {
