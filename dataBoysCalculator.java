@@ -141,12 +141,12 @@ public class dataBoysCalculator {
         createRoundedButton("÷", 235, 305, listener, frame, 65, new Color(250, 153, 0), Color.white);       
         createRoundedImageButton("equationimages/xy.png", 305, 305, listener, frame, 40, 40, "xʸ");
         createRoundedImageButton("equationimages/xyz.png", 375, 305, listener, frame, 40, 40,"xʸᶻ");
-        createRoundedImageButton("equationimages/Pi.png", 445, 305, listener, frame, 40, 40, "π");
+        createRoundedImageButton("equationimages/Pi.png", 445, 305, listener, frame, 40, 40, "∏");
         createRoundedButton("0", 25, 360, listener, frame, 65, Color.white, Color.BLACK);
         createRoundedButton(".", 95, 360, listener, frame, 65, Color.white, Color.BLACK);
         createRoundedButton("=", 165, 360, listener, frame, 135, new Color(0, 153, 0), Color.white);
         createRoundedImageButton("equationimages/dualsummation.png", 305, 360, listener, frame, 80, 40, "∑∑");
-        createRoundedImageButton("equationimages/dualpi.png", 415, 360, listener, frame, 70, 40,"ππ");
+        createRoundedImageButton("equationimages/dualpi.png", 415, 360, listener, frame, 70, 40,"∏∏");
         createRoundedButton("SET", 25, 415, listener, frame, 275, new Color(102,102,102), Color.WHITE);
         createRoundedImageButton("equationimages/log2x.png", 305, 415, listener, frame, 80, 40, "log₂ x");
         createRoundedImageButton("equationimages/logx.png", 415, 415, listener, frame, 70, 40, "log x");
@@ -249,13 +249,182 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "log₂ x":
             calculateLogBase2(display);
             break;
-        case "x^y":
-            
+        case "xʸᶻ":
+            requestBaseAndTwoExponents(display);
             break;
+        case "∏":
+            requestProductInput(display);
+            break;
+        case "∏∏":
+            requestDoubleProductInput(display);
+        break;
         default:
             handleDefaultCommand(command, display);
             break;
     }
+}
+
+// for product
+private void requestProductInput(ImageTextField display) {
+    try {
+        String lowerInput = JOptionPane.showInputDialog(null, "Enter the lower limit:", "Lower Limit", JOptionPane.PLAIN_MESSAGE);
+        if (lowerInput == null || lowerInput.trim().isEmpty()) {
+            display.setText("Error: No lower limit entered");
+            return;
+        }
+        int lower = Integer.parseInt(lowerInput.trim());
+
+        String upperInput = JOptionPane.showInputDialog(null, "Enter the upper limit:", "Upper Limit", JOptionPane.PLAIN_MESSAGE);
+        if (upperInput == null || upperInput.trim().isEmpty()) {
+            display.setText("Error: No upper limit entered");
+            return;
+        }
+        int upper = Integer.parseInt(upperInput.trim());
+
+        String operation = JOptionPane.showInputDialog(null, "Enter the expression (use 'i' for the iterator):", "Operation Input", JOptionPane.PLAIN_MESSAGE);
+        if (operation == null || operation.trim().isEmpty()) {
+            display.setText("Error: No operation entered");
+            return;
+        }
+
+        double result = complexProduct(lower, upper, operation);
+        display.setText(String.valueOf(result));
+
+    } catch (NumberFormatException ex) {
+        display.setText("Error: Invalid input");
+    }
+}
+
+// for double product
+private void requestDoubleProductInput(ImageTextField display) {
+    try {
+        String lower1Input = JOptionPane.showInputDialog(null, "Enter the first lower limit:", "Lower Limit", JOptionPane.PLAIN_MESSAGE);
+        if (lower1Input == null || lower1Input.trim().isEmpty()) {
+            display.setText("Error: No first lower limit entered");
+            return;
+        }
+        int lower1 = Integer.parseInt(lower1Input.trim());
+
+        String upper1Input = JOptionPane.showInputDialog(null, "Enter the first upper limit:", "Upper Limit", JOptionPane.PLAIN_MESSAGE);
+        if (upper1Input == null || upper1Input.trim().isEmpty()) {
+            display.setText("Error: No first upper limit entered");
+            return;
+        }
+        int upper1 = Integer.parseInt(upper1Input.trim());
+
+        String lower2Input = JOptionPane.showInputDialog(null, "Enter the second lower limit:", "Second Lower Limit", JOptionPane.PLAIN_MESSAGE);
+        if (lower2Input == null || lower2Input.trim().isEmpty()) {
+            display.setText("Error: No second lower limit entered");
+            return;
+        }
+        int lower2 = Integer.parseInt(lower2Input.trim());
+
+        String upper2Input = JOptionPane.showInputDialog(null, "Enter the second upper limit:", "Second Upper Limit", JOptionPane.PLAIN_MESSAGE);
+        if (upper2Input == null || upper2Input.trim().isEmpty()) {
+            display.setText("Error: No second upper limit entered");
+            return;
+        }
+        int upper2 = Integer.parseInt(upper2Input.trim());
+
+        String operation = JOptionPane.showInputDialog(null, "Enter the expression (use 'i' for the first iterator and 'j' for the second):", "Operation Input", JOptionPane.PLAIN_MESSAGE);
+        if (operation == null || operation.trim().isEmpty()) {
+            display.setText("Error: No operation entered");
+            return;
+        }
+
+        double result = complexDoubleProduct(lower1, upper1, lower2, upper2, operation);
+        display.setText(String.valueOf(result));
+
+    } catch (NumberFormatException ex) {
+        display.setText("Error: Invalid input");
+    }
+}
+
+public static double complexProduct(int lower, int upper, String operation) {
+    double product = 1;
+    for (int i = lower; i <= upper; i++) {
+        product *= evaluateExpression(operation, i);
+    }
+    return product;
+}
+
+public static double complexDoubleProduct(int lower1, int upper1, int lower2, int upper2, String operation) {
+    double product = 1;
+    for (int i = lower1; i <= upper1; i++) {
+        for (int j = lower2; j <= upper2; j++) {
+            product *= evaluateExpression(operation, i, j);
+        }
+    }
+    return product;
+}
+
+private static double evaluateExpression(String operation, int value) {
+    String expr = operation.replace("i", String.valueOf(value));
+    return eval(expr);
+}
+
+private static double evaluateExpression(String operation, int value1, int value2) {
+    String expr = operation.replace("i", String.valueOf(value1)).replace("j", String.valueOf(value2));
+    return eval(expr);
+}
+
+private static double eval(String expression) {
+    try {
+        if (expression.contains("+")) {
+            String[] parts = expression.split("\\+");
+            return Double.parseDouble(parts[0]) + Double.parseDouble(parts[1]);
+        } else if (expression.contains("-")) {
+            String[] parts = expression.split("-");
+            return Double.parseDouble(parts[0]) - Double.parseDouble(parts[1]);
+        } else if (expression.contains("*")) {
+            String[] parts = expression.split("\\*");
+            return Double.parseDouble(parts[0]) * Double.parseDouble(parts[1]);
+        } else if (expression.contains("/")) {
+            String[] parts = expression.split("/");
+            return Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]);
+        } else {
+            return Double.parseDouble(expression);
+        }
+    } catch (Exception e) {
+        return 0; 
+    }
+}
+
+private void requestBaseAndTwoExponents(ImageTextField display) {
+    try {
+        String baseInput = JOptionPane.showInputDialog(null, "Enter the base (x):", "Base Input", JOptionPane.PLAIN_MESSAGE);
+        if (baseInput == null || baseInput.trim().isEmpty()) {
+            display.setText("Error: No base entered");
+            return;
+        }
+        
+        double base = Double.parseDouble(baseInput.trim());
+
+        String exponentInput = JOptionPane.showInputDialog(null, "Enter the first exponent (y):", "Exponent Input", JOptionPane.PLAIN_MESSAGE);
+        if (exponentInput == null || exponentInput.trim().isEmpty()) {
+            display.setText("Error: No exponent (y) entered");
+            return;
+        }
+
+        double exponent = Double.parseDouble(exponentInput.trim());
+
+        String secondExponentInput = JOptionPane.showInputDialog(null, "Enter the second exponent (z):", "Second Exponent Input", JOptionPane.PLAIN_MESSAGE);
+        if (secondExponentInput == null || secondExponentInput.trim().isEmpty()) {
+            display.setText("Error: No exponent (z) entered");
+            return;
+        }
+
+        double secondExponent = Double.parseDouble(secondExponentInput.trim());
+        calculatePowerForTwoExponents(base, exponent, secondExponent, display);
+
+    } catch (NumberFormatException ex) {
+        display.setText("Error: Invalid input");
+    }
+}
+
+private void calculatePowerForTwoExponents(double base, double exponent, double secondExponent, ImageTextField display) {
+    double result = Math.pow(base, Math.pow(exponent, secondExponent));
+    display.setText(String.valueOf(result));
 }
 
 private void calculateLogBase2(ImageTextField display) {
@@ -276,6 +445,7 @@ private void calculateLogBase2(ImageTextField display) {
         display.setText("Error: No Input");
     }
 }
+
 
 private void calculateLog(ImageTextField display) {
     String input = display.getText().trim();
@@ -356,7 +526,7 @@ private void appendToDisplay(ImageTextField display, String command) {
 
 // Method to check if a command is an operator
 private boolean isOperator(String command) {
-    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷");
+    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%");
 }
 
 private void performFloorOrCeil(ImageTextField display) {
@@ -513,11 +683,16 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
             case "÷":
                 if (secondValue == 0) {
                     display.setText("Error: Div by 0");
-                    return; // Exit if division by zero
+                    return; 
                 }
                 result = firstValue / secondValue;
                 break;
-            
+            case "xʸ": 
+                result = Math.pow(firstValue, secondValue);
+                break;
+            case "%":
+                result = firstValue % secondValue;
+                break;
             default:
                 display.setText("Error: Invalid Operation");
                 return;
