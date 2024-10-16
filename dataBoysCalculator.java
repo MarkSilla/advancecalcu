@@ -91,10 +91,10 @@ public class dataBoysCalculator {
     private double currentValue = 0;
     private boolean isNewOperation = false;
     private ImageTextField display;
-    private int aValue = 1;
-    private int bValue = 1;
-    private int cValue = 1;
-    private int dValue = 1;
+    private int aValue = 0;
+    private int bValue = 0;
+    private int cValue = 0;
+    private int dValue = 0;
     private JLabel valuesLabel;
     
     public static void main(String[] args) {
@@ -255,31 +255,75 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
         case "Σ":
                 performSingleSummation();
                 break;
-            case "∑∑":
+        case "∑∑":
                 performDoubleSummation();
                 break;
-            case "∏":
+        case "∏":
                 performSingleProduct();
                 break;
-            case "∏∏":
+        case "∏∏":
                 performDoubleProduct();
                 break;
-            case "SET":
+        case "SET":
                 showSetDialog();
                 break;
-            case "A":
-            case "B":
-            case "C":
-            case "D":
+        case "A":
+        case "B":
+        case "C":
+        case "D":
                 setValue(command, "Enter value for " + command + ":", command.charAt(0));
                 break;
-                
+        case "a!+b!":
+                calculateFactorialSum(display);
+            break;
+        case "log x": 
+            calculateLog(display);
+            break;
+        case "log₂ x":
+            calculateLogBase2(display);
+            break;
+        case "xʸᶻ":
+            requestBaseAndTwoExponents(display);
+            break;    
         default:
             handleDefaultCommand(command, display);
             break;
     }
 }
 // for a!+b!
+private void calculateFactorialSum(ImageTextField display) {
+    String aInput = JOptionPane.showInputDialog("Enter the first number (a) for a!:");
+    if (aInput == null || aInput.trim().isEmpty()) {
+        display.setText("Error: No input for a!");
+        return; 
+    }
+
+    String bInput = JOptionPane.showInputDialog("Enter the second number (b) for b!:");
+    if (bInput == null || bInput.trim().isEmpty()) {
+        display.setText("Error: No input for b!");
+        return; 
+    }
+
+    try {
+        int a = Integer.parseInt(aInput.trim());
+        int b = Integer.parseInt(bInput.trim());
+
+        if (a < 0 || b < 0) {
+            display.setText("Error: Factorial is not defined for negative numbers.");
+            return; 
+        }
+
+        BigInteger factorialA = factorial(a);
+        BigInteger factorialB = factorial(b);
+        BigInteger result = factorialA.add(factorialB);
+
+        display.setText("" + result.toString());
+    } catch (NumberFormatException ex) {
+        display.setText("Error: Invalid input. Please enter integers.");
+    } catch (Exception e) {
+        display.setText("Error: " + e.getMessage());
+    }
+}
     private void showSetDialog() {
         String[] options = {"A", "B", "C", "D"};
         String selected = (String) JOptionPane.showInputDialog(null, "Choose a variable to set:",
@@ -502,7 +546,7 @@ private void appendToDisplay(ImageTextField display, String command) {
 
 // Method to check if a command is an operator
 private boolean isOperator(String command) {
-    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%");
+    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%") || command.equals("//");
 }
 
 private void performFloorOrCeil(ImageTextField display) {
@@ -585,10 +629,10 @@ private void clearAllEntry(ImageTextField display) {
     display.setText("");
     display.setIcon(null); // Clear the icon
     currentValue = 0; // Reset current value if needed
-    aValue = 1;
-    bValue = 1;
-    cValue = 1;
-    dValue = 1;
+    aValue = 0;
+    bValue = 0;
+    cValue = 0;
+    dValue = 0;
     updateValuesLabel();
 }
 
@@ -675,6 +719,14 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
             case "%":
                 result = firstValue % secondValue;
                 break;
+            case "//":
+                if (secondValue == 0) {
+                    display.setText("Error: Div by 0");
+                    return;
+                }
+                result = (int) firstValue / (int) secondValue; 
+                break;
+            
             default:
                 display.setText("Error: Invalid Operation");
                 return;
