@@ -4,6 +4,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.math.BigInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.*;
 
 class ImageTextField extends JTextField {
@@ -46,8 +51,8 @@ class ImageTextField extends JTextField {
             icon.paintIcon(this, g, iconX, iconY);
 
             // Set the text position to the right of the icon
-            int textX = iconX + icon.getIconWidth() + 10; // Space between icon and text
-            g.drawString(getText(), textX, (getHeight() + g.getFontMetrics().getAscent()) / 2); // Center the text vertically
+            int textX = iconX + icon.getIconWidth() + 10; 
+            g.drawString(getText(), textX, (getHeight() + g.getFontMetrics().getAscent()) / 2); 
         }
     }
 
@@ -55,14 +60,11 @@ class ImageTextField extends JTextField {
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
         if (icon != null) {
-            d.width += icon.getIconWidth() + 20; // Adjust width to accommodate the icon and padding
+            d.width += icon.getIconWidth() + 20; 
         }
         return d;
     }
 }
-
-
-// Rest of the code remains the same
 
 class RoundedButton extends JButton {
     private final int cornerRadius;
@@ -88,15 +90,13 @@ class RoundedButton extends JButton {
 }
 
 public class dataBoysCalculator {
-    private double currentValue = 0;
     private boolean isNewOperation = false;
     private ImageTextField display;
-    private int aValue = 0;
-    private int bValue = 0;
-    private int cValue = 0;
-    private int dValue = 0;
-    private JLabel valuesLabel;
-    
+    private boolean isSetMode = false;
+    private RoundedButton setButton;
+    private JTextField equationField;
+    private JTextField nValueField;
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new dataBoysCalculator().createAndShowGUI()); 
     }
@@ -108,6 +108,7 @@ public class dataBoysCalculator {
         frame.setLayout(null);
         frame.setSize(550, 625);
         frame.getContentPane().setBackground(Color.black);
+        display = new ImageTextField();
 
         display = new ImageTextField();
         display.setBounds(25, 25, 485, 100);
@@ -116,14 +117,8 @@ public class dataBoysCalculator {
         display.setForeground(Color.BLACK);
         display.setFont(new Font("SansSerif", Font.BOLD, 25));
         frame.add(display);
-        
-        valuesLabel = new JLabel(getCurrentValuesText());
-        valuesLabel.setBounds(310, 5, 200, 20);  // Adjust position as needed
-        valuesLabel.setForeground(Color.WHITE);
-        valuesLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        valuesLabel.setHorizontalAlignment(JLabel.RIGHT);
-        frame.add(valuesLabel);
 
+     
         ActionListener listener = e -> ButtonClick(e, display);
         // Button creation 
         createRoundedButton("DEL", 25, 140, listener, frame, 65, new Color(204, 0, 0), Color.WHITE);
@@ -152,14 +147,14 @@ public class dataBoysCalculator {
         createRoundedButton("3", 165, 305, listener, frame, 65, Color.white, Color.BLACK); 
         createRoundedButton("÷", 235, 305, listener, frame, 65, new Color(250, 153, 0), Color.white);       
         createRoundedImageButton("equationimages/xy.png", 305, 305, listener, frame, 40, 40, "xʸ");
-        createRoundedImageButton("equationimages/xyz.png", 375, 305, listener, frame, 40, 40,"xʸᶻ");
+        createRoundedImageButton("equationimages/xyz.png", 375, 305, listener, frame, 40, 40,"xyz");
         createRoundedImageButton("equationimages/Pi.png", 445, 305, listener, frame, 40, 40, "∏");
         createRoundedButton("0", 25, 360, listener, frame, 65, Color.white, Color.BLACK);
         createRoundedButton(".", 95, 360, listener, frame, 65, Color.white, Color.BLACK);
         createRoundedButton("=", 165, 360, listener, frame, 135, new Color(0, 153, 0), Color.white);
         createRoundedImageButton("equationimages/dualsummation.png", 305, 360, listener, frame, 80, 40, "∑∑");
         createRoundedImageButton("equationimages/dualpi.png", 415, 360, listener, frame, 70, 40,"∏∏");
-        createRoundedButton("SET", 25, 415, listener, frame, 275, new Color(102,102,102), Color.WHITE);
+        setButton = createRoundedButton("SET", 25, 415, e -> toggleSetMode(), frame, 275, new Color(102,102,102), Color.WHITE);
         createRoundedImageButton("equationimages/log2x.png", 305, 415, listener, frame, 80, 40, "log₂ x");
         createRoundedImageButton("equationimages/logx.png", 415, 415, listener, frame, 70, 40, "log x");
         createRoundedButton("A", 25, 470, listener, frame, 65, new Color(102,102,102), Color.WHITE);
@@ -167,7 +162,7 @@ public class dataBoysCalculator {
         createRoundedButton("C", 165, 470, listener, frame, 65, new Color(102,102,102), Color.WHITE);
         createRoundedButton("D", 235, 470, listener, frame, 65, new Color(102,102,102), Color.WHITE);
         createRoundedImageButton("equationimages/asumb.png", 305, 470, listener, frame, 80, 40, "a!+b!");
-        createRoundedImageButton("equationimages/adivb.png", 415, 470, listener, frame, 70, 40, "a/b");       
+        createRoundedImageButton("equationimages/adivb.png", 415, 470, listener, frame, 70, 40, "a!/b!");       
         createRoundedImageButton("equationimages/x.png", 25, 525, listener, frame, 50, 40, "xy");        
         createRoundedImageButton("equationimages/xsumy.png", 105, 525, listener, frame, 50, 40, "x+y");        
         createRoundedImageButton("equationimages/xy.png", 185, 525, listener, frame, 50, 40,"xʸ");        
@@ -176,9 +171,18 @@ public class dataBoysCalculator {
         createRoundedImageButton("equationimages/xc.png", 430, 525, listener, frame, 55, 40,"x^c");
         frame.setVisible(true);
     }
-     
+    private void toggleSetMode() {
+        isSetMode = !isSetMode;
+        if (isSetMode) {
+            setButton.setBackground(new Color(0, 153, 0)); // Green color for ON state
+            display.setText("SET Mode: ON");
+        } else {
+            setButton.setBackground(new Color(102, 102, 102)); // Original color for OFF state
+            display.setText("SET Mode: OFF");
+        }
+    } 
     //for RoundedButtons
-    private void createRoundedButton(String text, int x, int y, ActionListener listener, JFrame frame, int width, Color backgroundColor, Color foreGroundColor) {
+    private RoundedButton createRoundedButton(String text, int x, int y, ActionListener listener, JFrame frame, int width, Color backgroundColor, Color foreGroundColor) {
         RoundedButton button = new RoundedButton(text, 20);
         button.setBounds(x, y, width, 50);
         button.setForeground(foreGroundColor); 
@@ -186,6 +190,7 @@ public class dataBoysCalculator {
         button.setBackground(backgroundColor); 
         button.addActionListener(listener);
         frame.add(button);
+        return button;
     }
 
     //for RoundedImageButtons
@@ -253,206 +258,399 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
             calculateCubeRoot(display);
             break;
         case "Σ":
-                performSingleSummation();
-                break;
-        case "∑∑":
-                performDoubleSummation();
-                break;
-        case "∏":
-                performSingleProduct();
-                break;
-        case "∏∏":
-                performDoubleProduct();
-                break;
-        case "SET":
-                showSetDialog();
-                break;
-        case "A":
-        case "B":
-        case "C":
-        case "D":
-                setValue(command, "Enter value for " + command + ":", command.charAt(0));
-                break;
-        case "a!+b!":
-                calculateFactorialSum(display);
+          performSummation(display); 
             break;
+        case"∑∑":
+            performDoubleSummation(display);
+        break;
+        case "xy":
+        addXYToDisplay(display);
+        break;
         case "log x": 
             calculateLog(display);
             break;
         case "log₂ x":
             calculateLogBase2(display);
             break;
-        case "xʸᶻ":
-            requestBaseAndTwoExponents(display);
-            break;    
+        case "∏":
+            performProduct(display);
+            break;
+        case "∏∏":
+            performDoubleProduct(display);
+        break;
+        case "a!+b!":
+        calculateFactorialSum(display);
+        break;
+        case "a!/b!":
+        calculateFactorialDivision(display);
+        break;
+        case "xyz":
+        handleIconCommand("xyz", display);
+        break;
         default:
             handleDefaultCommand(command, display);
             break;
     }
 }
-// for a!+b!
+
 private void calculateFactorialSum(ImageTextField display) {
-    String aInput = JOptionPane.showInputDialog("Enter the first number (a) for a!:");
-    if (aInput == null || aInput.trim().isEmpty()) {
-        display.setText("Error: No input for a!");
+    String input = display.getText().trim(); 
+    System.out.println("Input from display: '" + input + "'"); 
+    if (input.isEmpty()) {
+        display.setText("Error: No input provided.");
         return; 
     }
 
-    String bInput = JOptionPane.showInputDialog("Enter the second number (b) for b!:");
-    if (bInput == null || bInput.trim().isEmpty()) {
-        display.setText("Error: No input for b!");
+    Pattern pattern = Pattern.compile("(\\d+)A\\s*\\+\\s*(\\d+)B");
+    Matcher matcher = pattern.matcher(input);
+
+    if (!matcher.matches()) {
+        display.setText("Error: Invalid input format. Please use '5A + 3B'.");
+        return; 
+    }
+    int a = Integer.parseInt(matcher.group(1));
+    int b = Integer.parseInt(matcher.group(2));
+    if (a < 0 || b < 0) {
+        display.setText("Error: Factorial is not defined for negative numbers.");
+        return; 
+    }
+    BigInteger factorialA = factorial(a);
+    BigInteger factorialB = factorial(b);
+    BigInteger result = factorialA.add(factorialB);
+    display.setText(result.toString()); 
+}
+private BigInteger factorial(int n) {
+    BigInteger result = BigInteger.ONE;
+    for (int i = 2; i <= n; i++) {
+        result = result.multiply(BigInteger.valueOf(i));
+    }
+    return result;
+}
+
+private void calculateFactorialDivision(ImageTextField display) {
+    String input = display.getText().trim(); // Get input from the display
+    if (input.isEmpty()) {
+        display.setText("Error: No input provided.");
         return; 
     }
 
+    Pattern pattern = Pattern.compile("(\\d+)A\\s*÷\\s*(\\d+)B");
+    Matcher matcher = pattern.matcher(input);
+
+    if (!matcher.matches()) {
+        display.setText("Error: Invalid input format. Please use '5A / 2B'.");
+        return; 
+    }
+    int a = Integer.parseInt(matcher.group(1));
+    int b = Integer.parseInt(matcher.group(2));
+    if (a < 0 || b < 0) {
+        display.setText("Error: Factorial is not defined for negative numbers.");
+        return; 
+    }
+    BigInteger factorialA = factorialdiv(a);
+    BigInteger factorialB = factorialdiv(b);
+
+   
+    if (factorialB.equals(BigInteger.ZERO)) {
+        display.setText("Error: Division by zero.");
+        return;
+    }
+    BigInteger result = factorialA.divide(factorialB); 
+
+    // Display the result
+    display.setText(result.toString()); 
+}
+
+private BigInteger factorialdiv(int n) {
+    BigInteger result = BigInteger.ONE;
+    for (int i = 2; i <= n; i++) {
+        result = result.multiply(BigInteger.valueOf(i));
+    }
+    return result;
+}
+
+
+
+private double evaluateXYExpression(String expression) {
+    ScriptEngineManager manager = new ScriptEngineManager();
+    ScriptEngine engine = manager.getEngineByName("JavaScript");
     try {
-        int a = Integer.parseInt(aInput.trim());
-        int b = Integer.parseInt(bInput.trim());
+        Object result = engine.eval(expression);
+        return ((Number) result).doubleValue();
+    } catch (ScriptException e) {
+        return Double.NaN; // Handle error as needed
+    }
+}
 
-        if (a < 0 || b < 0) {
-            display.setText("Error: Factorial is not defined for negative numbers.");
-            return; 
+
+
+// Example function to retrieve the value of y
+private double getYValue() {
+    // Return the user-defined value for y, which can be set elsewhere in your program
+    return 1; // Change this to your desired y value or method to get y from user input
+}
+
+
+// for DualSummation
+private void performSummation(ImageTextField display) {
+    try {
+        String input = display.getText().trim();
+        Pattern pattern = Pattern.compile("(\\d+)A\\s*\\+\\s*(\\d+)B");
+        Matcher matcher = pattern.matcher(input);
+
+        if (!matcher.matches()) {
+            display.setText("Error: Invalid input format. Use format: nA + mB");
+            return;
         }
 
-        BigInteger factorialA = factorial(a);
-        BigInteger factorialB = factorial(b);
-        BigInteger result = factorialA.add(factorialB);
+        int start = Integer.parseInt(matcher.group(1));
+        int end = Integer.parseInt(matcher.group(2));
 
-        display.setText("" + result.toString());
-    } catch (NumberFormatException ex) {
-        display.setText("Error: Invalid input. Please enter integers.");
+        if (isSetMode) {
+            handleSetModeSummation(start, end);
+        } else {
+            handleNormalSummation(start, end);
+        }
     } catch (Exception e) {
         display.setText("Error: " + e.getMessage());
     }
 }
-    private void showSetDialog() {
-        String[] options = {"A", "B", "C", "D"};
-        String selected = (String) JOptionPane.showInputDialog(null, "Choose a variable to set:",
-                "Set Variable", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-        if (selected != null) {
-            setValue(selected, "Enter value for " + selected + ":", selected.charAt(0));
-        }
-    }
 
-    private void setValue(String variable, String message, char var) {
-        String input = JOptionPane.showInputDialog(null, message);
-        try {
-            int value = Integer.parseInt(input);
-            switch (var) {
-                case 'A':
-                    aValue = value;
-                    break;
-                case 'B':
-                    bValue = value;
-                    break;
-                case 'C':
-                    cValue = value;
-                    break;
-                case 'D':
-                    dValue = value;
-                    break;
+private void handleSetModeSummation(int start, int end) {
+    String equation = JOptionPane.showInputDialog("Enter equation (Cx, x+C, or x^C):");
+    double constant = Double.parseDouble(JOptionPane.showInputDialog("Enter constant value:"));
+
+    double sum = 0;
+    switch (equation) {
+        case "Cx":
+            for (long n = start; n <= end; n++) {
+                sum += constant * n;
             }
-            updateValuesLabel();
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid input. Please enter an integer.");
-        }
-    }
-
-    private void performSingleSummation() {
-        if (aValue > bValue) {
-            JOptionPane.showMessageDialog(null, "Ensure A <= B for the summation");
-            return;
-        }
-        int sum = 0;
-        for (int i = aValue; i <= bValue; i++) {
-            sum += i;
-        }
-        display.setText(String.valueOf(sum));
-    }
-
-    private void performDoubleSummation() {
-        if (aValue > bValue || cValue > dValue) {
-            JOptionPane.showMessageDialog(null, "Ensure A <= B and C <= D for the summation");
-            return;
-        }
-        int sum = 0;
-        for (int i = aValue; i <= bValue; i++) {
-            for (int j = cValue; j <= dValue; j++) {
-                sum += i + j;
+            break;
+        case "x+C":
+            for (long n = start; n <= end; n++) {
+                sum += n + constant;
             }
-        }
-        display.setText(String.valueOf(sum));
-    }
-
-    private void performSingleProduct() {
-        if (aValue > bValue) {
-            JOptionPane.showMessageDialog(null, "Ensure A <= B for the product");
-            return;
-        }
-        long product = 1;
-        for (int i = aValue; i <= bValue; i++) {
-            product *= i;
-        }
-        display.setText(String.valueOf(product));
-    }
-
-    private void performDoubleProduct() {
-        if (aValue > bValue || cValue > dValue) {
-            JOptionPane.showMessageDialog(null, "Ensure A <= B and C <= D for the product");
-            return;
-        }
-        long product = 1;
-        for (int i = aValue; i <= bValue; i++) {
-            for (int j = cValue; j <= dValue; j++) {
-                product *= (i * j);
+            break;
+        case "x^C":
+            for (long n = start; n <= end; n++) {
+                sum += Math.pow(n, constant);
             }
-        }
-        display.setText(String.valueOf(product));
+            break;
+        default:
+            if (constant == 0 || constant == 1) {
+                for (long n = start; n <= end; n++) {
+                    sum += n;
+                }
+            } else {
+                for (long n = start; n <= end; n++) {
+                    sum += constant;
+                }
+            }
     }
+    display.setText(String.valueOf(sum));
+}
 
-    private void updateValuesLabel() {
-        valuesLabel.setText(getCurrentValuesText());
+private void handleNormalSummation(int start, int end) {
+    double sum = 0;
+    for (int i = start; i <= end; i++) {
+        sum += i;
     }
+    display.setText(String.valueOf(sum));
+}
 
-    private String getCurrentValuesText() {
-        return String.format("A = %d, B = %d, C = %d, D = %d", aValue, bValue, cValue, dValue);
-    }
-
-private void requestBaseAndTwoExponents(ImageTextField display) {
+private void performDoubleSummation(ImageTextField display) {
     try {
-        String baseInput = JOptionPane.showInputDialog(null, "Enter the base (x):", "Base Input", JOptionPane.PLAIN_MESSAGE);
-        if (baseInput == null || baseInput.trim().isEmpty()) {
-            display.setText("Error: No base entered");
-            return;
-        }
-        
-        double base = Double.parseDouble(baseInput.trim());
+        String input = display.getText().trim();
+        Pattern pattern = Pattern.compile("(\\d+)A(\\d+)B(\\d+)C(\\d+)D");
+        Matcher matcher = pattern.matcher(input);
 
-        String exponentInput = JOptionPane.showInputDialog(null, "Enter the first exponent (y):", "Exponent Input", JOptionPane.PLAIN_MESSAGE);
-        if (exponentInput == null || exponentInput.trim().isEmpty()) {
-            display.setText("Error: No exponent (y) entered");
+        if (!matcher.matches()) {
+            display.setText("Error: Invalid input format. Use format: nAmBpCqD");
             return;
         }
 
-        double exponent = Double.parseDouble(exponentInput.trim());
+        int start1 = Integer.parseInt(matcher.group(1));
+        int end1 = Integer.parseInt(matcher.group(2));
+        int start2 = Integer.parseInt(matcher.group(3));
+        int end2 = Integer.parseInt(matcher.group(4));
 
-        String secondExponentInput = JOptionPane.showInputDialog(null, "Enter the second exponent (z):", "Second Exponent Input", JOptionPane.PLAIN_MESSAGE);
-        if (secondExponentInput == null || secondExponentInput.trim().isEmpty()) {
-            display.setText("Error: No exponent (z) entered");
-            return;
+        if (isSetMode) {
+            handleSetModeDoubleSummation(start1, end1, start2, end2);
+        } else {
+            handleNormalDoubleSummation(start1, end1, start2, end2);
         }
-
-        double secondExponent = Double.parseDouble(secondExponentInput.trim());
-        calculatePowerForTwoExponents(base, exponent, secondExponent, display);
-
-    } catch (NumberFormatException ex) {
-        display.setText("Error: Invalid input");
+    } catch (Exception e) {
+        display.setText("Error: " + e.getMessage());
     }
 }
 
-private void calculatePowerForTwoExponents(double base, double exponent, double secondExponent, ImageTextField display) {
-    double result = Math.pow(base, Math.pow(exponent, secondExponent));
-    display.setText(String.valueOf(result));
+private void handleSetModeDoubleSummation(int start1, int end1, int start2, int end2) {
+    String equation = JOptionPane.showInputDialog("Enter equation (xy, x+y, or x^y):");
+    double nValue = Double.parseDouble(JOptionPane.showInputDialog("Enter n value:"));
+
+    double sum = 0;
+    for (int n = start1; n <= end1; n++) {
+        for (int j = start2; j <= end2; j++) {
+            switch (equation) {
+                case "xy":
+                    sum += (nValue * n * j);
+                    break;
+                case "x+y":
+                    sum += (nValue * n + j);
+                    break;
+                case "x^y":
+                    sum += (nValue * Math.pow(n, j));
+                    break;
+                default:
+                    sum += n * j;
+            }
+        }
+    }
+    display.setText(String.valueOf(sum));
 }
+
+private void handleNormalDoubleSummation(int start1, int end1, int start2, int end2) {
+    double sum = 0;
+    for (int i = start1; i <= end1; i++) {
+        for (int j = start2; j <= end2; j++) {
+            sum += i * j;
+        }
+    }
+    display.setText(String.valueOf(sum));
+}
+
+private void performProduct(ImageTextField display) {
+    try {
+        String input = display.getText().trim();
+        Pattern pattern = Pattern.compile("(\\d+)A\\s*\\+\\s*(\\d+)B");
+        Matcher matcher = pattern.matcher(input);
+
+        if (!matcher.matches()) {
+            display.setText("Error: Invalid input format. Use format: nA + mB");
+            return;
+        }
+
+        int start = Integer.parseInt(matcher.group(1));
+        int end = Integer.parseInt(matcher.group(2));
+
+        if (isSetMode) {
+            handleSetModeProduct(start, end);
+        } else {
+            handleNormalProduct(start, end);
+        }
+    } catch (Exception e) {
+        display.setText("Error: " + e.getMessage());
+    }
+}
+
+private void handleSetModeProduct(int start, int end) {
+    String equation = JOptionPane.showInputDialog("Enter equation (Cx, x+C, or x^C):");
+    double constant = Double.parseDouble(JOptionPane.showInputDialog("Enter constant value:"));
+
+    double product = 1;
+    switch (equation) {
+        case "Cx":
+            for (long n = start; n <= end; n++) {
+                product *= constant * n;
+            }
+            break;
+        case "x+C":
+            for (long n = start; n <= end; n++) {
+                product *= n + constant;
+            }
+            break;
+        case "x^C":
+            for (long n = start; n <= end; n++) {
+                product *= Math.pow(n, constant);
+            }
+            break;
+        default:
+            if (constant == 0 || constant == 1) {
+                for (long n = start; n <= end; n++) {
+                    product *= n;
+                }
+            } else {
+                for (long n = start; n <= end; n++) {
+                    product *= constant;
+                }
+            }
+    }
+    display.setText(String.valueOf(product));
+}
+
+private void handleNormalProduct(int start, int end) {
+    double product = 1;
+    for (int i = start; i <= end; i++) {
+        product *= i;
+    }
+    display.setText(String.valueOf(product));
+}
+
+private void performDoubleProduct(ImageTextField display) {
+    try {
+        String input = display.getText().trim();
+        Pattern pattern = Pattern.compile("(\\d+)A(\\d+)B(\\d+)C(\\d+)D");
+        Matcher matcher = pattern.matcher(input);
+
+        if (!matcher.matches()) {
+            display.setText("Error: Invalid input format. Use format: nAmBpCqD");
+            return;
+        }
+
+        int start1 = Integer.parseInt(matcher.group(1));
+        int end1 = Integer.parseInt(matcher.group(2));
+        int start2 = Integer.parseInt(matcher.group(3));
+        int end2 = Integer.parseInt(matcher.group(4));
+
+        if (isSetMode) {
+            handleSetModeDoubleProduct(start1, end1, start2, end2);
+        } else {
+            handleNormalDoubleProduct(start1, end1, start2, end2);
+        }
+    } catch (Exception e) {
+        display.setText("Error: " + e.getMessage());
+    }
+}
+
+private void handleSetModeDoubleProduct(int start1, int end1, int start2, int end2) {
+    String equation = JOptionPane.showInputDialog("Enter equation (xy, x+y, or x^y):");
+    double nValue = Double.parseDouble(JOptionPane.showInputDialog("Enter n value:"));
+
+    double product = 1;
+    for (int n = start1; n <= end1; n++) {
+        for (int j = start2; j <= end2; j++) {
+            switch (equation) {
+                case "xy":
+                    product *= (nValue * n * j);
+                    break;
+                case "x+y":
+                    product *= (nValue * n + j);
+                    break;
+                case "x^y":
+                    product *= (nValue * Math.pow(n, j));
+                    break;
+                default:
+                    product *= n * j;
+            }
+        }
+    }
+    display.setText(String.valueOf(product));
+}
+
+private void handleNormalDoubleProduct(int start1, int end1, int start2, int end2) {
+    double product = 1;
+    for (int i = start1; i <= end1; i++) {
+        for (int j = start2; j <= end2; j++) {
+            product *= i * j;
+        }
+    }
+    display.setText(String.valueOf(product));
+}
+
+
+// Request Double Product Input Method
+
 
 private void calculateLogBase2(ImageTextField display) {
     String input = display.getText().trim();
@@ -472,7 +670,6 @@ private void calculateLogBase2(ImageTextField display) {
         display.setText("Error: No Input");
     }
 }
-
 
 private void calculateLog(ImageTextField display) {
     String input = display.getText().trim();
@@ -523,15 +720,36 @@ private void calculateCubeRoot(ImageTextField display) {
 }
 
 private void handleIconCommand(String command, ImageTextField display) {
+    // Handle different commands based on the button pressed
     switch (command) {
-        case "Σ": 
-        
-        break;
-        
+        case "xyz": // Append '^' to the display
+            display.setText(display.getText().trim() + "^");
+            break;
+
+        case "Σ": // Handle summation logic here
+            // You can implement summation functionality if needed
+            break;
+
+        case "log x": // Handle logarithm input
+            display.setText("Enter log(base,value): ");
+            break;
+
+        case "√": // Handle square root calculation
+            String input = display.getText().trim();
+            try {
+                double value = Double.parseDouble(input);
+                double result = Math.sqrt(value);
+                display.setText(String.valueOf(result));
+            } catch (NumberFormatException e) {
+                display.setText("Error: Invalid Input");
+            }
+            break;
+
         default:
             break;
     }
 }
+
 
 private void appendToDisplay(ImageTextField display, String command) {
     String currentText = display.getText();
@@ -557,7 +775,6 @@ private void performFloorOrCeil(ImageTextField display) {
         display.setText("Error: Invalid Input");
     }
 }
-
 
 private void convertToInteger(ImageTextField display) {
     String currentText = display.getText().trim();
@@ -588,8 +805,6 @@ private void calculateFactorial(ImageTextField display) {
     }
 }
 
-
-
 private void toggleSign(ImageTextField display) {
     String currentTextSignToggle = display.getText().trim();
     if (!currentTextSignToggle.isEmpty()) {
@@ -619,7 +834,7 @@ private void clearLastEntry(ImageTextField display) {
     if (!currentText.isEmpty()) {
         display.setText(currentText.substring(0, currentText.length() - 1));
     }
-    // If the text is now empty after deletion, clear the icon as well
+   
     if (display.getText().isEmpty()) {
         display.setIcon(null); // Clear the icon
     }
@@ -628,21 +843,50 @@ private void clearLastEntry(ImageTextField display) {
 private void clearAllEntry(ImageTextField display) {
     display.setText("");
     display.setIcon(null); // Clear the icon
-    currentValue = 0; // Reset current value if needed
-    aValue = 0;
-    bValue = 0;
-    cValue = 0;
-    dValue = 0;
-    updateValuesLabel();
+}
+private void addXYToDisplay(ImageTextField display) {
+    String currentText = display.getText().trim(); // Get the current text
+    if (!currentText.isEmpty()) {
+        // Avoid appending multiple 'xy' and ensure proper spacing
+        if (!currentText.endsWith("xy")) {
+            display.setText(currentText + "xy "); // Append 'xy' to the display
+        }
+    }
 }
 
 private void calculate(ImageTextField display) {
     String input = display.getText().trim();
-    if (input.isEmpty()) return;
+    if (input.isEmpty()) {
+        display.setText("Error: No input provided.");
+        return;
+    }
+    // Check for the xʸ format (e.g., 1 xʸ 3)
+    Pattern xyPattern = Pattern.compile("(\\d+)\\s*xʸ\\s*(\\d+)");
+    Matcher xyMatcher = xyPattern.matcher(input);
 
+    if (xyMatcher.matches()) {
+        handleXYExpression(display, xyMatcher);
+        return;
+    }
+    // Check for the complex format (e.g., 1^2^3)
+    Pattern complexPattern = Pattern.compile("\\s*(\\d+)\\s*\\^\\s*(\\d+)\\s*\\^\\s*(\\d+)\\s*");
+    Matcher complexMatcher = complexPattern.matcher(input);
+
+    if (complexMatcher.matches()) {
+        handleComplexExpression(display, complexMatcher);
+        return;
+    }
+    // Check for the FLR and CEIL commands
+    if (input.equalsIgnoreCase("FLR")) {
+        handleFloor(display);
+        return;
+    }
+    if (input.equalsIgnoreCase("CEIL")) {
+        handleCeiling(display);
+        return;
+    }
+    // Tokenize input for simpler expressions
     String[] tokens = input.split("\\s+");
-    double currentValue = 0;
-
     switch (tokens.length) {
         case 1:
             handleSingleToken(display, tokens[0]);
@@ -657,13 +901,11 @@ private void calculate(ImageTextField display) {
             break;
     }
 }
-
 private void handleSingleToken(ImageTextField display, String token) {
     try {
         // Attempt to parse the token as a double
         double firstValue = Double.parseDouble(token);
 
-        // Handle floor and ceiling based on the last command
         if ("FLR".equals(lastCommand)) {
             display.setText(String.valueOf(Math.floor(firstValue))); // Floor operation
         } else if ("CEIL".equals(lastCommand)) {
@@ -676,26 +918,75 @@ private void handleSingleToken(ImageTextField display, String token) {
         display.setText("Error: Invalid Input"); // Catch invalid number format
     }
 }
+private void handleXYExpression(ImageTextField display, Matcher matcher) {
+    try {
+        int base = Integer.parseInt(matcher.group(1)); 
+        int exponent = Integer.parseInt(matcher.group(2)); 
 
+        // Calculate base^exponent
+        double result = Math.pow(base, exponent);
 
-private BigInteger factorial(int value) {
-    if (value < 0) {
-        throw new IllegalArgumentException("Factorial is not defined for negative numbers.");
+        display.setText(String.valueOf(result));
+    } catch (NumberFormatException e) {
+        display.setText("Error: Invalid Input");
     }
-    BigInteger result = BigInteger.ONE; // Initialize result as BigInteger.ONE
-    for (int i = 1; i <= value; i++) {
-        result = result.multiply(BigInteger.valueOf(i)); // Use BigInteger for multiplication
-    }
-    return result; // Return the result as BigInteger
 }
 
-private void handleTwoOperands(ImageTextField display, String[] tokens) {
+private void handleComplexExpression(ImageTextField display, Matcher matcher) {
     try {
-        double firstValue = Double.parseDouble(tokens[0].trim());
-        String operator = tokens[1].trim();
-        double secondValue = Double.parseDouble(tokens[2].trim());
-        double result;
+        int base = Integer.parseInt(matcher.group(1)); 
+        int exponentY = Integer.parseInt(matcher.group(2)); 
+        int exponentZ = Integer.parseInt(matcher.group(3)); 
 
+        // Calculate y^z first
+        double yToZ = Math.pow(exponentY, exponentZ); 
+        // Then calculate base^(y^z)
+        double result = Math.pow(base, yToZ); 
+
+        display.setText(String.valueOf(result));
+    } catch (NumberFormatException e) {
+        display.setText("Error: Invalid Input");
+    }
+}
+
+private void handleFloor(ImageTextField display) {
+    try {
+        double value = Double.parseDouble(display.getText().trim());
+        display.setText(String.valueOf(Math.floor(value)));
+    } catch (NumberFormatException e) {
+        display.setText("Error: Invalid Input");
+    }
+}
+
+private void handleCeiling(ImageTextField display) {
+    try {
+        double value = Double.parseDouble(display.getText().trim());
+        display.setText(String.valueOf(Math.ceil(value)));
+    } catch (NumberFormatException e) {
+        display.setText("Error: Invalid Input");
+    }
+}
+private void handleTwoOperands(ImageTextField display, String[] tokens) {
+    String input = String.join(" ", tokens).trim();
+
+    // Use regex to check for valid input with // operator
+    Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*(//|\\+|\\-|×|÷|%)\\s*(\\d+)\\s*");
+    Matcher matcher = pattern.matcher(input);
+
+    if (!matcher.matches()) {
+        display.setText("Error: Invalid Input Format");
+        return;
+    }
+
+    try {
+        // Extract the operands and operator using the matcher
+        double firstValue = Double.parseDouble(matcher.group(1).trim());
+        String operator = matcher.group(2).trim();
+        double secondValue = Double.parseDouble(matcher.group(3).trim());
+
+        double result = 0;
+
+        // Handle operations
         switch (operator) {
             case "+":
                 result = firstValue + secondValue;
@@ -707,43 +998,39 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
                 result = firstValue * secondValue;
                 break;
             case "÷":
-                if (secondValue == 0) {
-                    display.setText("Error: Div by 0");
-                    return; 
-                }
-                result = firstValue / secondValue;
-                break;
-            case "xʸ": 
-                result = Math.pow(firstValue, secondValue);
-                break;
-            case "%":
-                result = firstValue % secondValue;
-                break;
-            case "//":
-                if (secondValue == 0) {
-                    display.setText("Error: Div by 0");
+                if (secondValue != 0) {
+                    result = firstValue / secondValue;
+                } else {
+                    display.setText("Error: Division by Zero");
                     return;
                 }
-                result = (int) firstValue / (int) secondValue; 
                 break;
-            
+            case "%":
+                if (secondValue != 0) {
+                    result = firstValue % secondValue;
+                } else {
+                    display.setText("Error: Division by Zero");
+                    return;
+                }
+                break;
+            case "//":
+                if (secondValue != 0) {
+                    result = Math.floor(firstValue / secondValue);
+                } else {
+                    display.setText("Error: Division by Zero");
+                    return;
+                }
+                break;
             default:
-                display.setText("Error: Invalid Operation");
+                display.setText("Error: Unsupported Operator");
                 return;
-             
         }
-        
 
-        // Handle floor and ceiling based on last command
-        if ("FLR".equals(lastCommand)) {
-            display.setText(String.valueOf(Math.floor(result))); // Apply floor
-        } else if ("CEIL".equals(lastCommand)) {
-            display.setText(String.valueOf(Math.ceil(result))); // Apply ceiling
-        } else {
-            display.setText(String.valueOf(result)); // Show result
-        }
+        display.setText(String.valueOf(result)); // Display the result
     } catch (NumberFormatException e) {
         display.setText("Error: Invalid Input");
+    } catch (Exception e) {
+        display.setText("Error: " + e.getMessage());
     }
- }
+}
 }
