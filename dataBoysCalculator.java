@@ -1,10 +1,10 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.math.BigInteger;
+import javax.swing.*;
 
 class ImageTextField extends JTextField {
     private Icon icon;
@@ -91,7 +91,12 @@ public class dataBoysCalculator {
     private double currentValue = 0;
     private boolean isNewOperation = false;
     private ImageTextField display;
-
+    private int aValue = 1;
+    private int bValue = 1;
+    private int cValue = 1;
+    private int dValue = 1;
+    private JLabel valuesLabel;
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new dataBoysCalculator().createAndShowGUI()); 
     }
@@ -154,7 +159,7 @@ public class dataBoysCalculator {
         createRoundedButton("B", 95, 470, listener, frame, 65, new Color(102,102,102), Color.WHITE);
         createRoundedButton("C", 165, 470, listener, frame, 65, new Color(102,102,102), Color.WHITE);
         createRoundedButton("D", 235, 470, listener, frame, 65, new Color(102,102,102), Color.WHITE);
-        createRoundedImageButton("equationimages/asumb.png", 305, 470, listener, frame, 80, 40, "a+b");
+        createRoundedImageButton("equationimages/asumb.png", 305, 470, listener, frame, 80, 40, "a!+b!");
         createRoundedImageButton("equationimages/adivb.png", 415, 470, listener, frame, 70, 40, "a/b");       
         createRoundedImageButton("equationimages/x.png", 25, 525, listener, frame, 50, 40, "xy");        
         createRoundedImageButton("equationimages/xsumy.png", 105, 525, listener, frame, 50, 40, "x+y");        
@@ -241,154 +246,124 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
             calculateCubeRoot(display);
             break;
         case "Σ":
-            handleIconCommand(command, display);
-            break;
-        case "log x": 
-            calculateLog(display);
-            break;
-        case "log₂ x":
-            calculateLogBase2(display);
-            break;
-        case "xʸᶻ":
-            requestBaseAndTwoExponents(display);
-            break;
-        case "∏":
-            requestProductInput(display);
-            break;
-        case "∏∏":
-            requestDoubleProductInput(display);
-        break;
+                performSingleSummation();
+                break;
+            case "∑∑":
+                performDoubleSummation();
+                break;
+            case "∏":
+                performSingleProduct();
+                break;
+            case "∏∏":
+                performDoubleProduct();
+                break;
+            case "SET":
+                showSetDialog();
+                break;
+            case "A":
+            case "B":
+            case "C":
+            case "D":
+                setValue(command, "Enter value for " + command + ":", command.charAt(0));
+                break;
         default:
             handleDefaultCommand(command, display);
             break;
     }
 }
-
-// for product
-private void requestProductInput(ImageTextField display) {
-    try {
-        String lowerInput = JOptionPane.showInputDialog(null, "Enter the lower limit:", "Lower Limit", JOptionPane.PLAIN_MESSAGE);
-        if (lowerInput == null || lowerInput.trim().isEmpty()) {
-            display.setText("Error: No lower limit entered");
-            return;
-        }
-        int lower = Integer.parseInt(lowerInput.trim());
-
-        String upperInput = JOptionPane.showInputDialog(null, "Enter the upper limit:", "Upper Limit", JOptionPane.PLAIN_MESSAGE);
-        if (upperInput == null || upperInput.trim().isEmpty()) {
-            display.setText("Error: No upper limit entered");
-            return;
-        }
-        int upper = Integer.parseInt(upperInput.trim());
-
-        String operation = JOptionPane.showInputDialog(null, "Enter the expression (use 'i' for the iterator):", "Operation Input", JOptionPane.PLAIN_MESSAGE);
-        if (operation == null || operation.trim().isEmpty()) {
-            display.setText("Error: No operation entered");
-            return;
-        }
-
-        double result = complexProduct(lower, upper, operation);
-        display.setText(String.valueOf(result));
-
-    } catch (NumberFormatException ex) {
-        display.setText("Error: Invalid input");
-    }
-}
-
-// for double product
-private void requestDoubleProductInput(ImageTextField display) {
-    try {
-        String lower1Input = JOptionPane.showInputDialog(null, "Enter the first lower limit:", "Lower Limit", JOptionPane.PLAIN_MESSAGE);
-        if (lower1Input == null || lower1Input.trim().isEmpty()) {
-            display.setText("Error: No first lower limit entered");
-            return;
-        }
-        int lower1 = Integer.parseInt(lower1Input.trim());
-
-        String upper1Input = JOptionPane.showInputDialog(null, "Enter the first upper limit:", "Upper Limit", JOptionPane.PLAIN_MESSAGE);
-        if (upper1Input == null || upper1Input.trim().isEmpty()) {
-            display.setText("Error: No first upper limit entered");
-            return;
-        }
-        int upper1 = Integer.parseInt(upper1Input.trim());
-
-        String lower2Input = JOptionPane.showInputDialog(null, "Enter the second lower limit:", "Second Lower Limit", JOptionPane.PLAIN_MESSAGE);
-        if (lower2Input == null || lower2Input.trim().isEmpty()) {
-            display.setText("Error: No second lower limit entered");
-            return;
-        }
-        int lower2 = Integer.parseInt(lower2Input.trim());
-
-        String upper2Input = JOptionPane.showInputDialog(null, "Enter the second upper limit:", "Second Upper Limit", JOptionPane.PLAIN_MESSAGE);
-        if (upper2Input == null || upper2Input.trim().isEmpty()) {
-            display.setText("Error: No second upper limit entered");
-            return;
-        }
-        int upper2 = Integer.parseInt(upper2Input.trim());
-
-        String operation = JOptionPane.showInputDialog(null, "Enter the expression (use 'i' for the first iterator and 'j' for the second):", "Operation Input", JOptionPane.PLAIN_MESSAGE);
-        if (operation == null || operation.trim().isEmpty()) {
-            display.setText("Error: No operation entered");
-            return;
-        }
-
-        double result = complexDoubleProduct(lower1, upper1, lower2, upper2, operation);
-        display.setText(String.valueOf(result));
-
-    } catch (NumberFormatException ex) {
-        display.setText("Error: Invalid input");
-    }
-}
-
-public static double complexProduct(int lower, int upper, String operation) {
-    double product = 1;
-    for (int i = lower; i <= upper; i++) {
-        product *= evaluateExpression(operation, i);
-    }
-    return product;
-}
-
-public static double complexDoubleProduct(int lower1, int upper1, int lower2, int upper2, String operation) {
-    double product = 1;
-    for (int i = lower1; i <= upper1; i++) {
-        for (int j = lower2; j <= upper2; j++) {
-            product *= evaluateExpression(operation, i, j);
+// for a!+b!
+    private void showSetDialog() {
+        String[] options = {"A", "B", "C", "D"};
+        String selected = (String) JOptionPane.showInputDialog(null, "Choose a variable to set:",
+                "Set Variable", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (selected != null) {
+            setValue(selected, "Enter value for " + selected + ":", selected.charAt(0));
         }
     }
-    return product;
-}
 
-private static double evaluateExpression(String operation, int value) {
-    String expr = operation.replace("i", String.valueOf(value));
-    return eval(expr);
-}
-
-private static double evaluateExpression(String operation, int value1, int value2) {
-    String expr = operation.replace("i", String.valueOf(value1)).replace("j", String.valueOf(value2));
-    return eval(expr);
-}
-
-private static double eval(String expression) {
-    try {
-        if (expression.contains("+")) {
-            String[] parts = expression.split("\\+");
-            return Double.parseDouble(parts[0]) + Double.parseDouble(parts[1]);
-        } else if (expression.contains("-")) {
-            String[] parts = expression.split("-");
-            return Double.parseDouble(parts[0]) - Double.parseDouble(parts[1]);
-        } else if (expression.contains("*")) {
-            String[] parts = expression.split("\\*");
-            return Double.parseDouble(parts[0]) * Double.parseDouble(parts[1]);
-        } else if (expression.contains("/")) {
-            String[] parts = expression.split("/");
-            return Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]);
-        } else {
-            return Double.parseDouble(expression);
+    private void setValue(String variable, String message, char var) {
+        String input = JOptionPane.showInputDialog(null, message);
+        try {
+            int value = Integer.parseInt(input);
+            switch (var) {
+                case 'A':
+                    aValue = value;
+                    break;
+                case 'B':
+                    bValue = value;
+                    break;
+                case 'C':
+                    cValue = value;
+                    break;
+                case 'D':
+                    dValue = value;
+                    break;
+            }
+            updateValuesLabel();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Invalid input. Please enter an integer.");
         }
-    } catch (Exception e) {
-        return 0; 
     }
-}
+
+    private void performSingleSummation() {
+        if (aValue > bValue) {
+            JOptionPane.showMessageDialog(null, "Ensure A <= B for the summation");
+            return;
+        }
+        int sum = 0;
+        for (int i = aValue; i <= bValue; i++) {
+            sum += i;
+        }
+        display.setText(String.valueOf(sum));
+    }
+
+    private void performDoubleSummation() {
+        if (aValue > bValue || cValue > dValue) {
+            JOptionPane.showMessageDialog(null, "Ensure A <= B and C <= D for the summation");
+            return;
+        }
+        int sum = 0;
+        for (int i = aValue; i <= bValue; i++) {
+            for (int j = cValue; j <= dValue; j++) {
+                sum += i + j;
+            }
+        }
+        display.setText(String.valueOf(sum));
+    }
+
+    private void performSingleProduct() {
+        if (aValue > bValue) {
+            JOptionPane.showMessageDialog(null, "Ensure A <= B for the product");
+            return;
+        }
+        long product = 1;
+        for (int i = aValue; i <= bValue; i++) {
+            product *= i;
+        }
+        display.setText(String.valueOf(product));
+    }
+
+    private void performDoubleProduct() {
+        if (aValue > bValue || cValue > dValue) {
+            JOptionPane.showMessageDialog(null, "Ensure A <= B and C <= D for the product");
+            return;
+        }
+        long product = 1;
+        for (int i = aValue; i <= bValue; i++) {
+            for (int j = cValue; j <= dValue; j++) {
+                product *= (i * j);
+            }
+        }
+        display.setText(String.valueOf(product));
+    }
+
+    private void updateValuesLabel() {
+        valuesLabel.setText(getCurrentValuesText());
+    }
+
+    private String getCurrentValuesText() {
+        return String.format("A = %d, B = %d, C = %d, D = %d", aValue, bValue, cValue, dValue);
+    }
 
 private void requestBaseAndTwoExponents(ImageTextField display) {
     try {
@@ -455,7 +430,7 @@ private void calculateLog(ImageTextField display) {
             if (value <= 0) {
                 display.setText("Error: Non-positive Input");
             } else {
-                double result = Math.log10(value);
+                double result = Math.log(value);
                 display.setText(String.valueOf(result));
             }
         } catch (NumberFormatException ex) {
@@ -498,15 +473,8 @@ private void calculateCubeRoot(ImageTextField display) {
 private void handleIconCommand(String command, ImageTextField display) {
     switch (command) {
         case "Σ": 
-        display.setText("n="); 
-        case "log x":
-                display.setText("Enter log(base,value): ");
-            break;
-            
         
-        case "√":
-                
-            break;
+        break;
         
         default:
             break;
@@ -526,7 +494,7 @@ private void appendToDisplay(ImageTextField display, String command) {
 
 // Method to check if a command is an operator
 private boolean isOperator(String command) {
-    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%") || command.equals("//");
+    return command.equals("+") || command.equals("-") || command.equals("×") || command.equals("÷") || command.equals("xʸ") || command.equals("%");
 }
 
 private void performFloorOrCeil(ImageTextField display) {
@@ -537,6 +505,7 @@ private void performFloorOrCeil(ImageTextField display) {
         display.setText("Error: Invalid Input");
     }
 }
+
 
 private void convertToInteger(ImageTextField display) {
     String currentText = display.getText().trim();
@@ -693,16 +662,9 @@ private void handleTwoOperands(ImageTextField display, String[] tokens) {
             case "%":
                 result = firstValue % secondValue;
                 break;
-            case "//":
-                if (secondValue == 0) {
-                    display.setText("Error: Div by 0");
-                    return;
-                }
-                result = (int) firstValue / (int) secondValue; 
-                break;
             default:
                 display.setText("Error: Invalid Operation");
-                return; 
+                return;
              
         }
         
