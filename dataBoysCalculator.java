@@ -174,11 +174,11 @@ public class dataBoysCalculator {
     private void toggleSetMode() {
         isSetMode = !isSetMode;
         if (isSetMode) {
-            setButton.setBackground(new Color(0, 153, 0)); // Green color for ON state
-            display.setText("SET Mode: ON");
+            setButton.setBackground(new Color(0, 153, 0));
+            display.setText("");
         } else {
-            setButton.setBackground(new Color(102, 102, 102)); // Original color for OFF state
-            display.setText("SET Mode: OFF");
+            setButton.setBackground(new Color(102, 102, 102)); 
+            display.setText("");
         }
     } 
     //for RoundedButtons
