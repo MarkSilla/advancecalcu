@@ -116,6 +116,13 @@ public class dataBoysCalculator {
         display.setForeground(Color.BLACK);
         display.setFont(new Font("SansSerif", Font.BOLD, 25));
         frame.add(display);
+        
+        valuesLabel = new JLabel(getCurrentValuesText());
+        valuesLabel.setBounds(310, 5, 200, 20);  // Adjust position as needed
+        valuesLabel.setForeground(Color.WHITE);
+        valuesLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        valuesLabel.setHorizontalAlignment(JLabel.RIGHT);
+        frame.add(valuesLabel);
 
         ActionListener listener = e -> ButtonClick(e, display);
         // Button creation 
@@ -266,6 +273,7 @@ private void ButtonClick(ActionEvent e, ImageTextField display) {
             case "D":
                 setValue(command, "Enter value for " + command + ":", command.charAt(0));
                 break;
+                
         default:
             handleDefaultCommand(command, display);
             break;
@@ -577,6 +585,11 @@ private void clearAllEntry(ImageTextField display) {
     display.setText("");
     display.setIcon(null); // Clear the icon
     currentValue = 0; // Reset current value if needed
+    aValue = 1;
+    bValue = 1;
+    cValue = 1;
+    dValue = 1;
+    updateValuesLabel();
 }
 
 private void calculate(ImageTextField display) {
