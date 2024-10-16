@@ -482,7 +482,7 @@ private void calculateLog(ImageTextField display) {
             if (value <= 0) {
                 display.setText("Error: Non-positive Input");
             } else {
-                double result = Math.log(value);
+                double result = Math.log10(value);
                 display.setText(String.valueOf(result));
             }
         } catch (NumberFormatException ex) {
